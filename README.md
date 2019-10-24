@@ -1,6 +1,6 @@
-# NetScan		
+# hfs_moitor
 
-分布式多线程全网扫描		 
+HFS服务器监控平台	 
 
   		  
 ![Alt text](https://github.com/yanchen0/hfs_montior/blob/master/1.jpg)
