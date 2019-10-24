@@ -1,0 +1,86 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <title>HFS服务器监控平台</title>
+    {% include 'css_script.html' %}
+</head>
+<body>
+    {% include 'menu.html' %}
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-xs-18 col-md-12">
+                <div id="grid"></div>
+            </div>
+        </div>
+    </div>
+    <footer class="footer">
+        <div class="container-fluid">
+            <p align="center" class="text-muted">Copyright © 2019 Rising. All rights reserved.</p>
+        </div>
+    </footer>
+   
+
+    <script>
+        $(function () {
+            $("#responsive-panel").kendoResponsivePanel({
+                breakpoint: 768,
+                autoClose: false,
+                orientation: "top"
+            });
+            $("#menu").kendoMenu();
+            $("#grid").kendoGrid({
+                columns: [{
+                        title: "文件MD5",
+                        field: "md5",
+                        encoded: true
+                    }, {
+                        title: "下载时间",
+                        field: "down_time"
+                    }
+                ],
+                pageable: {
+                    numeric: true,
+                    previousNext: true,
+                    messages: {
+                        display: "共 {2} 条信息"
+                    }
+                },
+                sortable: true,
+                filterable: true,
+                messages: {
+                    noRecords: "没有记录."
+                },
+                dataSource: {
+                    transport: {
+                        read: {
+                            url: "{{url_for('host_url_query_md5') }}",
+                            dataType: "json",
+                            type: "POST"
+                        }
+                    },
+                    pageSize: 20,
+                    schema: {
+                        model: {
+                            fields: {
+                                url: {
+                                    type: "string"
+                                },
+                                status: {
+                                    type: "string"
+                                },
+                                add_time: {
+                                    type: "string"
+                                },
+                                last_crawl_time: {
+                                    type: "string"
+                                },
+                            }
+                        }
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+
+</html>

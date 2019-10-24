@@ -1,0 +1,180 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <title>HFS服务器监控平台</title>
+    {% include 'css_script.html' %}
+</head>
+<body>
+    {% include 'menu.html' %}
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-xs-18 col-md-12">
+                <div id="grid"></div>
+            </div>
+        </div>
+    </div>
+    <footer class="footer">
+        <div class="container-fluid">
+            <p align="center" class="text-muted">Copyright © 2019 Rising. All rights reserved.</p>
+        </div>
+    </footer>
+    <script>
+        function host_url_del(e) {
+            e.preventDefault();
+            var msg = "确定要删除吗？"; 
+            if (confirm(msg)==true) {
+            var dataItem = this.dataItem($(e.currentTarget).closest("tr"));
+            var data = {
+                data: JSON.stringify({
+                    "host_url": dataItem.url,
+                })
+            }
+            $.ajax({
+                url: "{{url_for('host_url_del') }}",
+                type: 'POST',
+                data: data,
+                success: function (msg) {
+                    if (msg.status == 0) {
+                        alert("删除失败")
+
+                    } else {
+                        alert("删除成功")
+
+                        $.ajax({
+                        url: "{{url_for('hfs_host_url_main') }}",
+                        type: 'POST',
+                        data: JSON.stringify({"url": dataItem.url}) })
+                        window.location = "/hfs_host_url";
+                    }
+                }
+            })}
+            else {
+                alert('已经取消了');
+            }
+        };
+    </script>
+	<script>
+        function host_url_query_md5(e) {
+            e.preventDefault();
+            var dataItem = this.dataItem($(e.currentTarget).closest("tr"));
+            var senddata = {
+                "host_url": dataItem.url,
+               
+            }
+            $.ajax({
+                dataType: "json",
+                url: "{{url_for('host_url_query_md5')}}",
+                type: "POST", //请求类型
+                data: JSON.stringify({
+                    "data": senddata
+                }),
+                success: function (msg) {
+                    if (msg.length) {
+                        window.location = "/host_url_query_md5";
+                    } else {
+                        alert("MD5列表为空")
+                    }
+                }
+            });
+            
+            };
+    </script>
+    <script>
+        $(function () {
+            $("#responsive-panel").kendoResponsivePanel({
+                breakpoint: 768,
+                autoClose: false,
+                orientation: "top"
+            });
+            $("#menu").kendoMenu();
+            $("#grid").kendoGrid({
+                columns: [{
+                        title: "主机",
+                        field: "url",
+                        encoded: true
+                    }, {
+                        title: "状态",
+                        field: "status",
+                        encoded: true,
+                        template: function (dataItem) {
+                            if (dataItem.status === "0") {
+                                return "<span style='color: red; '>异常</span>";
+                            } else if (dataItem.status === "1") {
+                                return "<span style='color: green; '>正常</span>";
+                            } else {
+                                return dataItem.ClientStatus;
+                            }
+                        }
+
+                    }, {
+                        title: "添加时间",
+                        field: "add_time"
+                    },
+                    {
+                        title: "最后抓取时间",
+                        field: "last_crawl_time"
+                    },
+                    {
+                        title: "&nbsp;",
+                        command: {
+                            text: "查询MD5",
+                            click: host_url_query_md5
+                            
+                        },
+                        width: "100px"
+                    },
+                    {
+                        title: "&nbsp;",
+                        command: {
+                            text: "删除",
+                            click: host_url_del
+                        },
+                        width: "80px"
+                    }
+                ],
+                pageable: {
+                    numeric: true,
+                    previousNext: true,
+                    messages: {
+                        display: "共 {2} 条信息"
+                    }
+                },
+                sortable: true,
+                filterable: true,
+                messages: {
+                    noRecords: "没有记录."
+                },
+                dataSource: {
+                    transport: {
+                        read: {
+                            url: "{{url_for('hfs_host_url_main') }}",
+                            dataType: "json",
+                            type: "POST"
+                        }
+                    },
+                    pageSize: 20,
+                    schema: {
+                        model: {
+                            fields: {
+                                url: {
+                                    type: "string"
+                                },
+                                status: {
+                                    type: "string"
+                                },
+                                add_time: {
+                                    type: "string"
+                                },
+                                last_crawl_time: {
+                                    type: "string"
+                                },
+                            }
+                        }
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+
+</html>

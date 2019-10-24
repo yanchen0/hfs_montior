@@ -1,0 +1,121 @@
+﻿<!DOCTYPE html>
+<html>
+
+<head>
+    <title>HFS服务器监控平台</title>
+    {% include 'css_script.html' %}
+    <style>
+        .col-center-block {
+            float: none;
+            display: block;
+            margin-left: 10%;
+            margin-right: auto;
+        }
+    </style>
+</head>
+
+<body>
+    {% include 'menu.html' %}
+    <div class="container-fluid placeholders">
+        <div class="row">
+            <form id="add-task" name="add-task" method="post" action="">
+                <h3 align="center">添加/修改HFS服务器</h3>
+                <div class="col-xs-5 col-md-6 col-center-block">
+                    <table class="table table-bordered">
+                        <tbody>
+                            <tr>
+                                <td><label for="host_url">地址</label></td>
+                                <td><input type="text" name="host_url" id="host_url" class="k-textbox"
+                                        style="width: 350px" required="required" validationMessage="不能留空" /></td>
+                                <td><label for="host_port">端口</label></td>
+                                <td><input type="text" oninput="if(value>65535) value=65535;if(value==0) value=1"
+                                        onkeyup="if(/\D/.test(this.value)){alert('端口只能输入数字');this.value='';}"
+                                        name="host_port" id="host_port" class="k-textbox" style="width: 350px"
+                                        required="required" validationMessage="不能留空" /></td>
+                                <td><label for="host_time">间隔</label></td>
+                                <td><input type="text" oninput="if(value>48) value=48;if(value==0) value=1"
+                                        onkeyup="if(/\D/.test(this.value)){alert('间隔只能输入数字');this.value='';}"
+                                        name="host_time" id="host_time" class="k-textbox" style="width: 350px"
+                                        required="required" validationMessage="不能留空" /></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <tr>
+                        <td colspan="2"><input type="button" value="添加" name="btn-submit" id="btn-submit"
+                                onclick="add()" style="margin-left: 100px;width: 100px" /></td>
+                    </tr>
+                    <tr>
+                        <td colspan="2"><input type="button" value="修改" name="btn-submit" id="btn-submit"
+                                onclick="modify()" style="margin-left: 100px;width: 100px" /></td>
+                    </tr>
+                </div>
+            </form>
+        </div>
+    </div>
+    <footer class="footer">
+        <script type="text/javascript">
+            $(function () {
+                var validator = $("#add-task").kendoValidator().data("kendoValidator");
+                $("#responsive-panel").kendoResponsivePanel({
+                    breakpoint: 768,
+                    autoClose: false,
+                    orientation: "left"
+                });
+                $("#menu").kendoMenu();
+            });
+
+            function add() {
+                var validator = $("#add-task").data("kendoValidator");
+                if (validator.validate()) {
+                    var formData = new FormData();
+                    formData.append("host_url", $("#host_url").val());
+                    formData.append("host_port", $("#host_port").val());
+                    formData.append("host_time", $("#host_time").val());
+                    $.ajax({
+                        url: "{{url_for('hfs_host_add') }}",
+                        type: 'POST',
+                        data: formData,
+                        processData: false,
+                        contentType: false,
+                        success: function (data) {
+                            if (data.status == 0) {
+                                alert("添加失败,数据存在")
+                            } 
+                            else if (data.status == 1) {
+                                alert("添加成功")
+                            }
+                            else {
+                                alert("添加失败,命中白名单")
+                            }
+                        }
+                    });
+                }
+            };
+
+            function modify() {
+                var validator = $("#add-task").data("kendoValidator");
+                if (validator.validate()) {
+                    var formData = new FormData();
+                    formData.append("host_url", $("#host_url").val());
+                    formData.append("host_port", $("#host_port").val());
+                    formData.append("host_time", $("#host_time").val());
+                    $.ajax({
+                        url: "{{url_for('hfs_host_modify') }}",
+                        type: 'POST',
+                        data: formData,
+                        processData: false,
+                        contentType: false,
+                        success: function (data) {
+                            if (data.status == 0) {
+                                alert("修改失败, 数据不存在")
+                            } else {
+                                alert("修改成功")
+                            }
+                        }
+                    });
+                }
+            };
+        </script>
+</body>
+
+</html>

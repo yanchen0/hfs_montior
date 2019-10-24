@@ -1,0 +1,232 @@
+﻿<!DOCTYPE html>
+<html>
+
+<head>
+    <title>HFS服务器监控平台</title>
+    {% include 'css_script.html' %}
+</head>
+
+<body>
+    {% include 'menu.html' %}
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-xs-18 col-md-12">
+                <div id="grid"></div>
+            </div>
+        </div>
+    </div>
+    <footer class="footer">
+        <div class="container-fluid">
+            <p align="center" class="text-muted">Copyright © 2019 Rising. All rights reserved.</p>
+        </div>
+    </footer>
+    <script>
+
+
+        function host_del(e) {
+            e.preventDefault();
+            var msg = "确定要删除吗？"; 
+            if (confirm(msg)==true) {
+            var dataItem = this.dataItem($(e.currentTarget).closest("tr"));
+            var data = {
+                data: JSON.stringify({
+                    "host_name": dataItem.host_name,
+                    "port": dataItem.port
+                })
+            }
+            $.ajax({
+                url: "{{url_for('host_del') }}",
+                type: 'POST',
+                data: data,
+                success: function (msg) {
+                    if (msg.status == 0) {
+                        alert("删除失败")
+
+                    } else {
+                        alert("删除成功")
+                        location.reload(true);
+                    }
+                }
+            })}
+            else {
+                alert('已经取消了');
+            }
+        };
+    </script>
+    <script>
+        function crawlNow(e) {
+            e.preventDefault();
+            var dataItem = this.dataItem($(e.currentTarget).closest("tr"));
+            var data = {
+                data: JSON.stringify({
+                    "host_name": dataItem.host_name,
+                    "port": dataItem.port
+                })
+            }
+            $.ajax({
+                url: "{{url_for('crawlNow_tasks') }}",
+                type: 'POST',
+                data: data,
+            })
+            alert("已发送抓取任务")
+        };
+    </script>
+    <script>
+        function host_query_url(e) {
+            e.preventDefault();
+            var dataItem = this.dataItem($(e.currentTarget).closest("tr"));
+            var senddata = {
+                "host_name": dataItem.host_name,
+                "port": dataItem.port
+            }
+            $.ajax({
+                dataType: "json",
+                url: "{{url_for('hfs_host_url_main')}}",
+                type: "POST", //请求类型
+                data: JSON.stringify({
+                    "data": senddata
+                }),
+                success: function (msg) {
+                    if (msg.length) {
+                        window.location = "/hfs_host_url";
+                    } else {
+                        alert("URL列表为空")
+                    }
+                }
+            });
+        }
+        $(function fun() {
+            $("#responsive-panel").kendoResponsivePanel({
+                breakpoint: 768,
+                autoClose: false,
+                orientation: "top"
+            });
+            $("#menu").kendoMenu();
+            $("#grid").kendoGrid({
+                columns: [{
+                        title: "主机",
+                        field: "host_name",
+                        encoded: true
+                    }, {
+                        title: "端口",
+                        field: "port",
+                        encoded: true
+                    }, {
+                        title: "位置",
+                        field: "location",
+                        encoded: true
+                    }, {
+                        title: "添加时间",
+                        field: "add_time"
+                    },
+                    {
+                        title: "最后抓取时间",
+                        field: "last_crawl_time"
+                    },
+                    {
+                        title: "抓取间隔(小时)",
+                        field: "crawl_interval",
+                        encoded: true
+                    },
+                    {
+                        title: "版本",
+                        field: "version",
+                        encoded: true
+                    }, {
+                        title: "状态",
+                        field: "status",
+                        encoded: true,
+                        template: function (dataItem) {
+                            if (dataItem.status === "0") {
+                                return "<span style='color: red; '>异常</span>";
+                            } else if (dataItem.status === "1") {
+                                return "<span style='color: green; '>正常</span>";
+                            } else {
+                                return dataItem.ClientStatus;
+                            }
+                        }
+                    }, {
+                        title: "&nbsp;",
+                        command: {
+                            text: "查询URL",
+                            click: host_query_url
+                        },
+                        width: "95px"
+                    },
+                    {
+                        title: "&nbsp;",
+                        command: {
+                            text: "立即抓取",
+                            click: crawlNow
+                        },
+                        width: "95px"
+                    },
+                    {
+                        title: "&nbsp;",
+                        command: {
+                            text: "删除",
+                            click: host_del
+                        },
+                        width: "80px"
+                    }
+                ],
+                pageable: {
+                    numeric: true,
+                    previousNext: true,
+                    messages: {
+                        display: "共 {2} 条信息"
+                    }
+                },
+                sortable: true,
+                filterable: true,
+                messages: {
+                    noRecords: "没有记录."
+                },
+                dataSource: {
+                    transport: {
+                        read: {
+                            url: "{{url_for('hfs_host_main') }}",
+                            dataType: "json",
+                            type: "POST"
+                        }
+                    },
+                    pageSize: 30,
+                    schema: {
+                        model: {
+                            fields: {
+                                host_name: {
+                                    type: "string"
+                                },
+                                port: {
+                                    type: "number"
+                                },
+                                location: {
+                                    type: "string"
+                                },
+                                add_time: {
+                                    type: "string"
+                                },
+                                last_crawl_time: {
+                                    type: "string"
+                                },
+                                crawl_interval: {
+                                    type: "string"
+                                },
+                                version: {
+                                    type: "string"
+                                },
+                                status: {
+                                    type: "string"
+                                },
+                            }
+                        }
+                    }
+                }
+            });
+
+
+        });
+    </script>
+</body>
+
+</html>
