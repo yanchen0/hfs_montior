@@ -3,10 +3,10 @@
 分布式多线程全网扫描		 
 
   		  
-![Alt text](https://github.com/yanchen0/hfs_montior/1.jpg)
+![Alt text](https://github.com/yanchen0/hfs_montior/blob/master/1.jpg)
 
   		  
-![Alt text](https://github.com/yanchen0/hfs_montior/2.jpg)
+![Alt text](https://github.com/yanchen0/hfs_montior/blob/master/2.jpg)
 
 
 实现功能：		
